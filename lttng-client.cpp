@@ -29,7 +29,6 @@ int main(int argc, char *argv[]) {
     std::cout << "child pid " << process_id << " child process group id "
               << process_group_id << "\n";
 
-
     /* TODO(Umit): output file make it parameterize */
     system("sudo lttng create nsession --output=/files/nsession");
     std::string tracking_str =
@@ -40,6 +39,7 @@ int main(int argc, char *argv[]) {
         "sudo lttng enable-event -s nsession -c channel0 --kernel --all "
         "--syscall");
     system("sudo lttng add-context -k --session=nsession --type=tid");
+    system("sudo lttng add-context -k --session=nsession --type=pid");
 
     // TODO(Umit): executable and parameters have to be paramerized */
     char *const exec_file = "readtest";
