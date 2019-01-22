@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   }
   waitpid(child_pid, nullptr, 0);
   system("sudo lttng stop nsession");
-  // system("babeltrace /files/nsession/kernel > babeltrace.out");
+  system("babeltrace /files/nsession/kernel > babeltrace.out");
   system("sudo lttng destroy nsession");
   return 0;
 }
