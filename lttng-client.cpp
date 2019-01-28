@@ -53,5 +53,6 @@ int main(int argc, char *argv[]) {
   system("sudo lttng stop nsession");
   system("babeltrace /files/nsession/kernel > babeltrace.out");
   system("sudo lttng destroy nsession");
+  system("sudo rm -rf /tmp/buffer-capture.dat");
   return 0;
 }
