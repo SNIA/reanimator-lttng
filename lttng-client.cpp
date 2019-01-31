@@ -46,7 +46,8 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
 }
 
 void process_options(int argc, char *argv[], bool *verbose,
-                     std::string *session_directory) {
+                     std::string *session_directory, std::string *exec_name,
+                     std::string *ds_output_name) {
   boost::program_options::variables_map options_vm = get_options(argc, argv);
 
   if (options_vm.count("verbose") != 0u) {
@@ -55,10 +56,22 @@ void process_options(int argc, char *argv[], bool *verbose,
               << "\n";
   }
 
+  if (options_vm.count("exec") != 0u) {
+    *exec_name = options_vm["exec"].as<std::string>();
+  } else {
+    assert(0);
+  }
+
   if (options_vm.count("session-directory") != 0u) {
     *session_directory = options_vm["session-directory"].as<std::string>();
   } else {
     *session_directory = "/tmp/session-capture";
+  }
+
+  if (options_vm.count("ds-output") != 0u) {
+    *ds_output_name = options_vm["ds-output"].as<std::string>();
+  } else {
+    *ds_output_name = (*exec_name) + ".ds";
   }
 }
 
@@ -81,14 +94,12 @@ void lttng_config(void) {
 int main(int argc, char *argv[]) {
   int process_id, process_group_id;
   bool verbose = false;
-  std::string executable_name = "readtest";
-  std::string ds_output_name = executable_name + ".ds";
-  std::string session_directory;
-
+  std::string executable_name, ds_output_name, session_directory;
   process_id = getpid();
   process_group_id = getpgid(process_id);
 
-  process_options(argc, argv, &verbose, &session_directory);
+  process_options(argc, argv, &verbose, &session_directory, &executable_name,
+                  &ds_output_name);
 
   if (verbose) {
     std::cout << "parent pid " << process_id << " process group id "
@@ -112,7 +123,6 @@ int main(int argc, char *argv[]) {
 
     std::string session_folder_create = "mkdir -p " + session_directory;
     system(session_folder_create.c_str());
-    /* TODO(Umit): output file make it parameterize */
     std::string create_session_cmd =
         "sudo lttng create strace2ds-session --output=";
     create_session_cmd += session_directory + " >> lttng-client.log";
@@ -125,21 +135,31 @@ int main(int argc, char *argv[]) {
 
     lttng_config();
 
-    // TODO(Umit): executable and parameters have to be paramerized */
     char *const exec_file = strdup(executable_name.c_str());
     char *const argv[] = {exec_file, nullptr};
     char *const env[] = {nullptr};
+    if (verbose) {
+      std::cout << ">>>> start capturing >>>>>"
+                << "\n";
+    }
     system("sudo lttng start strace2ds-session >> lttng-client.log");
 
     execve(exec_file, argv, env);
   }
+  if (verbose) {
+    std::cout << ">>>> finished test execution >>>>>"
+              << "\n";
+  }
   waitpid(child_pid, nullptr, 0);
+  if (verbose) {
+    std::cout << ">>>> stop capturing >>>>>"
+              << "\n";
+  }
   system("sudo lttng stop strace2ds-session >> lttng-client.log");
 
   std::string permission_update = "sudo chmod -R 755 " + session_directory;
   system(permission_update.c_str());
 
-  // TODO(Umit): dataseries output file parameterized
   std::string babeltrace_cmd = "babeltrace " + session_directory +
                                "/kernel -w " + ds_output_name +
                                " -x /tmp/buffer-capture.dat";
