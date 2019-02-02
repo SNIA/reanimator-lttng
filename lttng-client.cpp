@@ -4,8 +4,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <boost/program_options.hpp>
+#include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <string>
+
+#define PRE_LOG_MESSAGE std::left << std::setw(15) << ">>>>>>>>>>>"
+#define POST_LOG_MESSAGE ""
 
 boost::program_options::variables_map get_options(int argc, char *argv[]) {
   namespace po = boost::program_options;
@@ -22,7 +27,7 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
       "ds-output,d", po::value<std::string>(), "ds output file path");
 
   po::options_description test_program_parameters("test program parameters");
-  test_program_parameters.add_options()("test program parameters,p",
+  test_program_parameters.add_options()("test-program-parameters,p",
                                         po::value<std::vector<std::string>>(),
                                         "test program parameters");
 
@@ -33,7 +38,10 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
   visible.add(generic).add(config);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(cmdline_options).run(),
+  po::store(po::command_line_parser(argc, argv)
+                .options(cmdline_options)
+                .allow_unregistered()
+                .run(),
             vm);
   po::notify(vm);
 
@@ -47,13 +55,11 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
 
 void process_options(int argc, char *argv[], bool *verbose,
                      std::string *session_directory, std::string *exec_name,
-                     std::string *ds_output_name) {
+                     std::string *ds_output_name, int *executable_idx) {
   boost::program_options::variables_map options_vm = get_options(argc, argv);
 
   if (options_vm.count("verbose") != 0u) {
     *verbose = true;
-    std::cout << "verbose mode on"
-              << "\n";
   }
 
   if (options_vm.count("exec") != 0u) {
@@ -72,6 +78,14 @@ void process_options(int argc, char *argv[], bool *verbose,
     *ds_output_name = options_vm["ds-output"].as<std::string>();
   } else {
     *ds_output_name = (*exec_name) + ".ds";
+  }
+
+  for (int i = 0; i < argc; i++) {
+    auto parameter = argv[i];
+    std::string var(parameter);
+    if (var == "-e") {
+      *executable_idx = i;
+    }
   }
 }
 
@@ -93,17 +107,21 @@ void lttng_config(void) {
 
 int main(int argc, char *argv[]) {
   int process_id, process_group_id;
+  int child_process_parameter_idx = 0;
   bool verbose = false;
   std::string executable_name, ds_output_name, session_directory;
   process_id = getpid();
   process_group_id = getpgid(process_id);
 
   process_options(argc, argv, &verbose, &session_directory, &executable_name,
-                  &ds_output_name);
+                  &ds_output_name, &child_process_parameter_idx);
 
   if (verbose) {
-    std::cout << "parent pid " << process_id << " process group id "
-              << process_group_id << "\n";
+    std::ios_base::fmtflags flags = std::cout.flags();
+
+    std::cout << PRE_LOG_MESSAGE << "parent pid " << process_id
+              << " process group id " << process_group_id << POST_LOG_MESSAGE
+              << std::endl;
   }
 
   int child_pid = fork();
@@ -117,8 +135,9 @@ int main(int argc, char *argv[]) {
       process_group_id = getpgid(process_id);
     }
     if (verbose) {
-      std::cout << "child pid " << process_id << " child process group id "
-                << process_group_id << "\n";
+      std::cout << PRE_LOG_MESSAGE << "child pid " << process_id
+                << " child process group id " << process_group_id
+                << POST_LOG_MESSAGE << std::endl;
     }
 
     std::string session_folder_create = "mkdir -p " + session_directory;
@@ -136,24 +155,21 @@ int main(int argc, char *argv[]) {
     lttng_config();
 
     char *const exec_file = strdup(executable_name.c_str());
-    char *const argv[] = {exec_file, nullptr};
     char *const env[] = {nullptr};
     if (verbose) {
-      std::cout << ">>>> start capturing >>>>>"
-                << "\n";
+      std::cout << PRE_LOG_MESSAGE << "lttng start capturing"
+                << POST_LOG_MESSAGE << std::endl;
     }
     system("sudo lttng start strace2ds-session >> lttng-client.log");
 
-    execve(exec_file, argv, env);
-  }
-  if (verbose) {
-    std::cout << ">>>> finished test execution >>>>>"
-              << "\n";
+    execve(exec_file, (char *const *)&argv[child_process_parameter_idx + 1],
+           env);
   }
   waitpid(child_pid, nullptr, 0);
   if (verbose) {
-    std::cout << ">>>> stop capturing >>>>>"
-              << "\n";
+    std::cout << PRE_LOG_MESSAGE << "execution finished" << std::endl;
+    std::cout << PRE_LOG_MESSAGE << "lttng stop capturing" << POST_LOG_MESSAGE
+              << std::endl;
   }
   system("sudo lttng stop strace2ds-session >> lttng-client.log");
 
@@ -163,8 +179,25 @@ int main(int argc, char *argv[]) {
   std::string babeltrace_cmd = "babeltrace " + session_directory +
                                "/kernel -w " + ds_output_name +
                                " -x /tmp/buffer-capture.dat";
+  std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
+
+  std::chrono::high_resolution_clock::time_point babeltrace_start =
+      std::chrono::high_resolution_clock::now();
+
   system(babeltrace_cmd.c_str());
+
+  std::chrono::high_resolution_clock::time_point babeltrace_stop =
+      std::chrono::high_resolution_clock::now();
+  std::cout << PRE_LOG_MESSAGE << "babeltrace timing: "
+            << std::chrono::duration_cast<std::chrono::seconds>(
+                   babeltrace_stop - babeltrace_start)
+                   .count()
+            << "\n";
+
+  std::cout << PRE_LOG_MESSAGE << "babeltrace ended" << std::endl;
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");
+
+  std::cout.flags();
   return 0;
 }
