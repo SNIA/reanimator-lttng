@@ -1,6 +1,7 @@
 // Copyright FSL Lab Stony Brook University
 
 #include <stdlib.h>
+#include <sys/mman.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <boost/program_options.hpp>
@@ -112,13 +113,18 @@ int main(int argc, char *argv[]) {
   std::string executable_name, ds_output_name, session_directory;
   process_id = getpid();
   process_group_id = getpgid(process_id);
+  std::chrono::high_resolution_clock::time_point *timers =
+      (std::chrono::high_resolution_clock::time_point *)mmap(
+          nullptr, sizeof(std::chrono::high_resolution_clock::time_point) * 2,
+          PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+  std::chrono::high_resolution_clock::time_point whole_trace_start =
+      std::chrono::high_resolution_clock::now();
 
   process_options(argc, argv, &verbose, &session_directory, &executable_name,
                   &ds_output_name, &child_process_parameter_idx);
 
+  std::ios_base::fmtflags flags = std::cout.flags();
   if (verbose) {
-    std::ios_base::fmtflags flags = std::cout.flags();
-
     std::cout << PRE_LOG_MESSAGE << "parent pid " << process_id
               << " process group id " << process_group_id << POST_LOG_MESSAGE
               << std::endl;
@@ -162,16 +168,23 @@ int main(int argc, char *argv[]) {
     }
     system("sudo lttng start strace2ds-session >> lttng-client.log");
 
+    timers[0] = std::chrono::high_resolution_clock::now();
+
     execve(exec_file, (char *const *)&argv[child_process_parameter_idx + 1],
            env);
   }
   waitpid(child_pid, nullptr, 0);
+
+  timers[1] = std::chrono::high_resolution_clock::now();
+
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "execution finished" << std::endl;
     std::cout << PRE_LOG_MESSAGE << "lttng stop capturing" << POST_LOG_MESSAGE
               << std::endl;
   }
   system("sudo lttng stop strace2ds-session >> lttng-client.log");
+  std::chrono::high_resolution_clock::time_point whole_trace_end =
+      std::chrono::high_resolution_clock::now();
 
   std::string permission_update = "sudo chmod -R 755 " + session_directory;
   system(permission_update.c_str());
@@ -179,7 +192,10 @@ int main(int argc, char *argv[]) {
   std::string babeltrace_cmd = "babeltrace " + session_directory +
                                "/kernel -w " + ds_output_name +
                                " -x /tmp/buffer-capture.dat";
-  std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
+
+  if (verbose) {
+    std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
+  }
 
   std::chrono::high_resolution_clock::time_point babeltrace_start =
       std::chrono::high_resolution_clock::now();
@@ -188,16 +204,38 @@ int main(int argc, char *argv[]) {
 
   std::chrono::high_resolution_clock::time_point babeltrace_stop =
       std::chrono::high_resolution_clock::now();
-  std::cout << PRE_LOG_MESSAGE << "babeltrace timing: "
-            << std::chrono::duration_cast<std::chrono::seconds>(
+
+  if (verbose) {
+    std::cout << PRE_LOG_MESSAGE << "babeltrace ended" << std::endl;
+  }
+
+  std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
+            << "babeltrace timing" << std::left << std::setw(5) << ":"
+            << std::left << std::setw(5)
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
                    babeltrace_stop - babeltrace_start)
                    .count()
             << "\n";
 
-  std::cout << PRE_LOG_MESSAGE << "babeltrace ended" << std::endl;
+  std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
+            << "tracing total timing" << std::left << std::setw(5) << ":"
+            << std::left << std::setw(5)
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
+                   whole_trace_end - whole_trace_start)
+                   .count()
+            << "\n";
+
+  std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
+            << "tracing just for execution period timing" << std::left
+            << std::setw(5) << ":" << std::left << std::setw(5)
+            << std::chrono::duration_cast<std::chrono::milliseconds>(timers[1] -
+                                                                     timers[0])
+                   .count()
+            << "\n";
+
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");
 
-  std::cout.flags();
+  std::cout.flags(flags);
   return 0;
 }
