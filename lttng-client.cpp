@@ -12,6 +12,7 @@
 
 #define PRE_LOG_MESSAGE std::left << std::setw(15) << ">>>>>>>>>>>"
 #define POST_LOG_MESSAGE ""
+#define PRINT_STATISTICS
 
 boost::program_options::variables_map get_options(int argc, char *argv[]) {
   namespace po = boost::program_options;
@@ -92,7 +93,7 @@ void process_options(int argc, char *argv[], bool *verbose,
 
 void lttng_config(void) {
   system(
-      "sudo lttng enable-channel channel0 -k --discard --num-subbuf 32 >> "
+      "sudo lttng enable-channel channel0 -k --discard --num-subbuf 64 >> "
       "lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
@@ -191,7 +192,7 @@ int main(int argc, char *argv[]) {
 
   std::string babeltrace_cmd =
       "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
-      " -x /tmp/buffer-capture.dat" + " >> babeltrace.log";
+      " -x /tmp/buffer-capture.dat" + " >> babeltrace.bt";
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
@@ -209,6 +210,7 @@ int main(int argc, char *argv[]) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace ended" << std::endl;
   }
 
+#ifdef PRINT_STATISTICS
   std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
             << "babeltrace timing" << std::left << std::setw(5) << ":"
             << std::left << std::setw(5)
@@ -232,6 +234,7 @@ int main(int argc, char *argv[]) {
                                                                      timers[0])
                    .count()
             << "\n";
+#endif
 
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");
