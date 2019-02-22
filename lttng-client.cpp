@@ -178,6 +178,8 @@ int main(int argc, char *argv[]) {
 
   timers[1] = std::chrono::high_resolution_clock::now();
 
+  system("sudo lttng untrack -k --pid --all >> lttng-client.log");
+
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "execution finished" << std::endl;
     std::cout << PRE_LOG_MESSAGE << "lttng stop capturing" << POST_LOG_MESSAGE
