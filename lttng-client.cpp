@@ -239,10 +239,6 @@ int main(int argc, char *argv[]) {
             << "\n";
 #endif
 
-  system(
-      "sudo lttng disable-event -c channel0 -k --all-events >> "
-      "lttng-client.log");
-
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");
 
