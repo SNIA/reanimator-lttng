@@ -186,6 +186,7 @@ int main(int argc, char *argv[]) {
               << std::endl;
   }
   system("sudo lttng stop strace2ds-session >> lttng-client.log");
+
   std::chrono::high_resolution_clock::time_point whole_trace_end =
       std::chrono::high_resolution_clock::now();
 
@@ -237,6 +238,10 @@ int main(int argc, char *argv[]) {
                    .count()
             << "\n";
 #endif
+
+  system(
+      "sudo lttng disable-event -c channel0 -k --all-events >> "
+      "lttng-client.log");
 
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");

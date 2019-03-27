@@ -15,8 +15,8 @@ int main() {
     while (offset < (end_pos - begin_pos)) {
       file.read((char*)&record_id, sizeof(record_id));
       file.read((char*)&sizeOfBuffer, sizeof(sizeOfBuffer));
-      std::cout << std::dec << record_id << " " << sizeOfBuffer << " " << offset
-                << "\n";
+      std::cout << std::dec << "record id " << record_id << " size "
+                << sizeOfBuffer << " offset " << offset << "\n";
       auto buffer = new char[sizeOfBuffer];
       file.read(buffer, sizeof(buffer));
       delete[] buffer;
