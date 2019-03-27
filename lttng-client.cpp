@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <boost/program_options.hpp>
 #include <chrono>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -112,6 +113,8 @@ int main(int argc, char *argv[]) {
   int child_process_parameter_idx = 0;
   bool verbose = false;
   std::string executable_name, ds_output_name, session_directory;
+  std::ofstream report;
+
   process_id = getpid();
   process_group_id = getpgid(process_id);
   std::chrono::high_resolution_clock::time_point *timers =
@@ -213,31 +216,37 @@ int main(int argc, char *argv[]) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace ended" << std::endl;
   }
 
+  auto babeltrace_timing =
+      std::chrono::duration_cast<std::chrono::milliseconds>(babeltrace_stop -
+                                                            babeltrace_start)
+          .count();
+  auto total_tracing_timing =
+      std::chrono::duration_cast<std::chrono::milliseconds>(whole_trace_end -
+                                                            whole_trace_start)
+          .count();
+  auto just_tracing_timing =
+      std::chrono::duration_cast<std::chrono::milliseconds>(timers[1] -
+                                                            timers[0])
+          .count();
 #ifdef PRINT_STATISTICS
   std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
             << "babeltrace timing" << std::left << std::setw(5) << ":"
-            << std::left << std::setw(5)
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   babeltrace_stop - babeltrace_start)
-                   .count()
-            << "\n";
+            << std::left << std::setw(5) << babeltrace_timing << "\n";
 
   std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
             << "tracing total timing" << std::left << std::setw(5) << ":"
-            << std::left << std::setw(5)
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   whole_trace_end - whole_trace_start)
-                   .count()
-            << "\n";
+            << std::left << std::setw(5) << total_tracing_timing << "\n";
 
   std::cout << PRE_LOG_MESSAGE << std::left << std::setw(40)
             << "tracing just for execution period timing" << std::left
             << std::setw(5) << ":" << std::left << std::setw(5)
-            << std::chrono::duration_cast<std::chrono::milliseconds>(timers[1] -
-                                                                     timers[0])
-                   .count()
-            << "\n";
+            << just_tracing_timing << "\n";
 #endif
+
+  report.open("report.txt", std::ios::app);
+  report << just_tracing_timing << "\t" << total_tracing_timing << "\t"
+         << babeltrace_timing << "\n";
+  report.close();
 
   system("sudo lttng destroy strace2ds-session >> lttng-client.log");
   system("sudo rm -rf /tmp/buffer-capture.dat");
