@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   fd = open("/home/umit/research/lttng/fsl-lttng/build/mmaptest.file", O_RDWR, 0);
 
   fstat(fd, &sb);
-  printf("Size: %lu\n", (uint64_t)sb.st_size);
+  printf("file desc: %d, size: %lu\n", fd, (uint64_t)sb.st_size);
 
   memblock = mmap(NULL, sb.st_size, O_RDWR, MAP_SHARED, fd, 0);
   if (memblock == MAP_FAILED) handle_error("mmap");
