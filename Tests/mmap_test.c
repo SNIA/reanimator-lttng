@@ -27,10 +27,15 @@ int main(int argc, char *argv[]) {
   if (memblock == MAP_FAILED) handle_error("mmap");
 
   for (uint64_t i = 0; i < 10; i++) {
-    printf("[%lu]=%X ", i, memblock[i]);
+    printf("[%lu]=%X ", i, memblock[8192 + i]);
   }
   printf("\n");
 
+  for (uint64_t i = 0; i < 10; i++) {
+    printf("[%lu]=%X ", i, memblock[16384 + i]);
+  }
+  printf("\n");  
+  
   close(fd);
   return 0;
 }

@@ -100,9 +100,9 @@ void lttng_config(void) {
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "--all "
       "--syscall >> lttng-client.log");
-  // system(
-  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-  //     "mm_filemap_add_to_page_cache >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "mm_filemap_add_to_page_cache >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_fsl_read >> lttng-client.log");
