@@ -107,6 +107,12 @@ void lttng_config(void) {
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_fsl_read >> lttng-client.log");
   system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "fsl_writeback_dirty_page >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "writeback_dirty_page >> lttng-client.log");
+  system(
       "sudo lttng add-context -k --session=strace2ds-session --type=tid >> "
       "lttng-client.log");
   system(
@@ -205,6 +211,8 @@ int main(int argc, char *argv[]) {
   std::string babeltrace_cmd =
       "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
       " -x /tmp/buffer-capture.dat" + " >> babeltrace.bt";
+  // std::string babeltrace_cmd =
+  //     "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;

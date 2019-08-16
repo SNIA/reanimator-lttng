@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define handle_error(msg) \
   do {                    \
@@ -14,7 +15,7 @@
   } while (0)
 
 int main(int argc, char *argv[]) {
-  const char *memblock;
+  char *memblock;
   int fd;
   struct stat sb;
 
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
   fstat(fd, &sb);
   printf("file desc: %d, size: %lu\n", fd, (uint64_t)sb.st_size);
 
-  memblock = mmap(NULL, sb.st_size, O_RDWR, MAP_SHARED, fd, 0);
+  memblock = mmap(NULL, 4096 * 20, O_RDWR, MAP_SHARED, fd, 0);
   if (memblock == MAP_FAILED) handle_error("mmap");
 
   for (uint64_t i = 0; i < 10; i++) {
@@ -34,7 +35,13 @@ int main(int argc, char *argv[]) {
   for (uint64_t i = 0; i < 10; i++) {
     printf("[%lu]=%X ", i, memblock[16384 + i]);
   }
-  printf("\n");  
+  printf("\n");
+
+  strcpy(memblock, "TEST 123");
+  // msync(memblock, 4096 * 20, MS_SYNC);
+  strcpy(memblock + 4096, "TEST 123");
+  // msync(memblock, 4096 * 20, MS_SYNC);
+  fsync(fd);
   
   close(fd);
   return 0;
