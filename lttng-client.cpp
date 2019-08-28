@@ -112,6 +112,9 @@ void lttng_config(void) {
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "writeback_dirty_page >> lttng-client.log");
+  // system(
+  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+  //     "x86_exceptions_page_fault_user >> lttng-client.log");
   system(
       "sudo lttng add-context -k --session=strace2ds-session --type=tid >> "
       "lttng-client.log");
@@ -208,11 +211,11 @@ int main(int argc, char *argv[]) {
   std::string permission_update = "sudo chmod -R 755 " + session_directory;
   system(permission_update.c_str());
 
-  std::string babeltrace_cmd =
-      "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
-      " -x /tmp/buffer-capture.dat" + " >> babeltrace.bt";
   // std::string babeltrace_cmd =
-  //     "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
+  //     "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
+  //     " -x /tmp/buffer-capture.dat" + " >> babeltrace.bt";
+  std::string babeltrace_cmd =
+      "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
