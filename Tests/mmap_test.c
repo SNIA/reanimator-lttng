@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
   char *memblock;
   int fd;
   struct stat sb;
-
-  fd = open("/home/umit/research/lttng/fsl-lttng/build/mmaptest.file", O_RDWR, 0);
+  uint64_t i = 0;
+  fd = open("/root/research/lttng/fsl-lttng/build/mmaptest.file", O_RDWR, 0);
 
   fstat(fd, &sb);
   printf("file desc: %d, size: %lu\n", fd, (uint64_t)sb.st_size);
@@ -27,12 +27,12 @@ int main(int argc, char *argv[]) {
   memblock = mmap(NULL, 4096 * 20, O_RDWR, MAP_SHARED, fd, 0);
   if (memblock == MAP_FAILED) handle_error("mmap");
 
-  for (uint64_t i = 0; i < 10; i++) {
+  for (i = 0; i < 10; i++) {
     printf("[%lu]=%X ", i, memblock[8192 + i]);
   }
   printf("\n");
 
-  for (uint64_t i = 0; i < 10; i++) {
+  for (i = 0; i < 10; i++) {
     printf("[%lu]=%X ", i, memblock[16384 + i]);
   }
   printf("\n");

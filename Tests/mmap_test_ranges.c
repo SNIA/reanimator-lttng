@@ -18,6 +18,7 @@ int main(){
     char *memblock;
     int fd;
     struct stat sb;
+    int i;
 
     fd = open("mmaptest.file", O_RDWR, 0);
 
@@ -28,7 +29,7 @@ int main(){
     memblock = mmap(NULL, 4096 * 10, O_RDWR, MAP_SHARED, fd, 0);
     if (memblock == MAP_FAILED) handle_error("mmap");
 
-    for (uint64_t i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         printf("[%lu]=%X ", i, memblock[i]);
     }
     printf("\n");
