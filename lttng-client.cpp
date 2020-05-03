@@ -27,7 +27,7 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
       "lttng session directory path")(
       "exec,e", po::value<std::string>(),
       "executable string which is going to be run through lttng")(
-      "ds-output,d", po::value<std::string>(), "ds output file path");
+      "ds-output,o", po::value<std::string>(), "ds output file path");
 
   po::options_description test_program_parameters("test program parameters");
   test_program_parameters.add_options()("test-program-parameters,p",
@@ -96,13 +96,25 @@ void lttng_config(void) {
   system(
       "sudo lttng enable-channel channel0 -k --discard --num-subbuf 64 >> "
       "lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "--all "
-      "--syscall >> lttng-client.log");
+  // system(
+  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+  //     "--all "
+  //     "--syscall >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_add_to_page_cache >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "writeback_wbc_writepage >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "ext4_writepage >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "ext4_da_writepage >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "ext4_da_writepages >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_fsl_read >> lttng-client.log");
@@ -111,7 +123,13 @@ void lttng_config(void) {
       "fsl_writeback_dirty_page >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "writeback_dirty_page >> lttng-client.log");
+      "mm_vmscan_writepage >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "wbc_writepage_fsl >> lttng-client.log");
+  // system(
+  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+  //     "writeback_dirty_page >> lttng-client.log");
   // system(
   //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
   //     "x86_exceptions_page_fault_user >> lttng-client.log");
@@ -123,7 +141,7 @@ void lttng_config(void) {
       "lttng-client.log");
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
   int process_id, process_group_id;
   int child_process_parameter_idx = 0;
   bool verbose = false;
@@ -180,7 +198,7 @@ int main(int argc, char *argv[]) {
     lttng_config();
 
     char *const exec_file = strdup(executable_name.c_str());
-    char *const env[] = {nullptr};
+    // char *const env[] = {nullptr};
     if (verbose) {
       std::cout << PRE_LOG_MESSAGE << "lttng start capturing"
                 << POST_LOG_MESSAGE << std::endl;
@@ -190,7 +208,7 @@ int main(int argc, char *argv[]) {
     timers[0] = std::chrono::high_resolution_clock::now();
 
     execve(exec_file, (char *const *)&argv[child_process_parameter_idx + 1],
-           env);
+           envp);
   }
   waitpid(child_pid, nullptr, 0);
 
