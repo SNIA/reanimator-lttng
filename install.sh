@@ -6,7 +6,7 @@
 ####################
 # Script variables #
 ####################
-readonly programDependencies=("autoconf" "libtool" "make" "gcc" "g++" "perl" "git" "flex" "bison" "asciidoc" "libpopt-dev" "libxml2-dev" "uuid-dev" "libgtk2.0-dev" "libelf-dev" "libdw-dev")
+readonly programDependencies=("asciidoc" "autoconf" "bison" "flex" "g++" "gcc" "git" "libdw-dev" "libelf-dev" "libgtk2.0-dev" "libpopt-dev" "libtool" "libxml2-dev" "make" "perl" "uuid-dev")
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
@@ -38,9 +38,10 @@ function printUsage
     cat << EOF
 Usage: $0 [options...]
 Options:
-     --install              Install libraries and binaries under /usr/local
-     --install-packages     Automatically use apt-get to install missing packages
-     -h, --help             Print this help message
+    --config-args ARGS     Append ARGS to every ./configure command
+    --install              Install libraries and binaries under /usr/local
+    --install-packages     Automatically use apt-get to install missing packages
+    -h, --help             Print this help message
 EOF
     ) >&2
     exit 0
@@ -110,7 +111,7 @@ done
 if [[ "${#missingPrograms[@]}" -gt 0 ]]; then
     if [[ "${installPackages}" == true ]]; then
         echo "Installing missing programs."
-        sudo apt-get install -y "${missingPrograms[*]}"
+        runcmd sudo apt-get install -y ${missingPrograms[*]}
     else
         echo "Could not find all required programs. Not found:"
         for program in "${missingPrograms[@]}"; do
