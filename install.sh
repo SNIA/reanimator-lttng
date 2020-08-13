@@ -6,7 +6,7 @@
 ####################
 # Script variables #
 ####################
-readonly programDependencies=("asciidoc" "autoconf" "bison" "flex" "g++" "gcc" "git" "libdw-dev" "libelf-dev" "libgtk2.0-dev" "libpopt-dev" "libtool" "libxml2-dev" "make" "perl" "uuid-dev")
+readonly programDependencies=("asciidoc" "autoconf" "bison" "flex" "g++" "gcc" "git" "libdw-dev" "libelf-dev" "libgtk2.0-dev" "libpopt-dev" "libnuma-dev" "libtool" "libxml2-dev" "make" "perl" "uuid-dev")
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
