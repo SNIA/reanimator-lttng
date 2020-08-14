@@ -185,6 +185,6 @@ runcmd cd "${repositoryDir}"
 
 # Install fsl-strace
 runcmd cd fsl-strace
-runcmd sudo chmod +x dist/build-syscall-replayer.sh
-runcmd sudo dist/build-syscall-replayer.sh
+runcmd sudo chmod +x build-fsl-strace.sh
+runcmd sudo ./build-fsl-strace.sh --install --install-packages
 runcmd cd "${repositoryDir}"
