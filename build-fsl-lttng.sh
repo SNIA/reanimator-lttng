@@ -137,42 +137,42 @@ runcmd cd "${repositoryDir}"
 [[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
 
 # Install userspace-rcu
-# runcmd cd userspace-rcu
-# runcmd ./bootstrap
-# runcmd ./configure "${configArgs}"
-# runcmd make -j"${numberOfCores}" 
-# runcmd sudo make -j"${numberOfCores}" install
-# runcmd sudo ldconfig
-# runcmd cd "${repositoryDir}"
+runcmd cd userspace-rcu
+runcmd ./bootstrap
+runcmd ./configure "${configArgs}"
+runcmd make -j"${numberOfCores}" 
+runcmd sudo make -j"${numberOfCores}" install
+runcmd sudo ldconfig
+runcmd cd "${repositoryDir}"
 
-# # Install lttng-ust
-# runcmd cd  lttng-ust
-# runcmd ./bootstrap
-# runcmd ./configure "${configArgs}"
-# runcmd make -j"${numberOfCores}" 
-# runcmd sudo make -j"${numberOfCores}" install
-# runcmd sudo ldconfig
-# runcmd cd "${repositoryDir}"
+# Install lttng-ust
+runcmd cd  lttng-ust
+runcmd ./bootstrap
+runcmd ./configure "${configArgs}"
+runcmd make -j"${numberOfCores}" 
+runcmd sudo make -j"${numberOfCores}" install
+runcmd sudo ldconfig
+runcmd cd "${repositoryDir}"
 
-# # Install lttng-tools
-# runcmd cd lttng-tools
-# runcmd git checkout ds
-# runcmd ./bootstrap
-# runcmd ./configure "${configArgs}"
-# rumcmd make -j"${numberOfCores}" 
-# runcmd sudo make -j"${numberOfCores}" install
-# runcmd sudo ldconfig
-# runcmd cd "${repositoryDir}"
+# Install lttng-tools
+runcmd cd lttng-tools
+runcmd git checkout ds
+runcmd ./bootstrap
+runcmd ./configure "${configArgs}"
+rumcmd make -j"${numberOfCores}" 
+runcmd sudo make -j"${numberOfCores}" install
+runcmd sudo ldconfig
+runcmd cd "${repositoryDir}"
 
-# # Install lttng-modules
-# # Exhausts memory at 1 GiB memory, so try to have more
-# # Requires fsl-lttng-linux kernel
-# runcmd cd lttng-modules
-# runcmd git checkout ds
-# runcmd make -j"${numberOfCores}" 
-# runcmd sudo make -j"${numberOfCores}" modules_install
-# runcmd sudo depmod -a
-# runcmd cd "${repositoryDir}"
+# Install lttng-modules
+# Exhausts memory at 1 GiB memory, so try to have more
+# Requires fsl-lttng-linux kernel
+runcmd cd lttng-modules
+runcmd git checkout ds
+runcmd make -j"${numberOfCores}" 
+runcmd sudo make -j"${numberOfCores}" modules_install
+runcmd sudo depmod -a
+runcmd cd "${repositoryDir}"
 
 # Install fsl-strace
 runcmd cd fsl-strace
