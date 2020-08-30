@@ -134,57 +134,83 @@ runcmd cd "${repositoryDir}"
 [[ -d "babeltrace" ]] || runcmd git clone https://github.com/sbu-fsl/babeltrace.git
 [[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
 [[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/fsl-strace.git
+[[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
 
 # Install userspace-rcu
-runcmd cd userspace-rcu
-runcmd ./bootstrap
-runcmd ./configure "${configArgs}"
-runcmd make -j"${numberOfCores}" 
-runcmd sudo make -j"${numberOfCores}" install
-runcmd sudo ldconfig
-runcmd cd "${repositoryDir}"
+# runcmd cd userspace-rcu
+# runcmd ./bootstrap
+# runcmd ./configure "${configArgs}"
+# runcmd make -j"${numberOfCores}" 
+# runcmd sudo make -j"${numberOfCores}" install
+# runcmd sudo ldconfig
+# runcmd cd "${repositoryDir}"
 
-# Install lttng-ust
-runcmd cd  lttng-ust
-runcmd ./bootstrap
-runcmd ./configure "${configArgs}"
-runcmd make -j"${numberOfCores}" 
-runcmd sudo make -j"${numberOfCores}" install
-runcmd sudo ldconfig
-runcmd cd "${repositoryDir}"
+# # Install lttng-ust
+# runcmd cd  lttng-ust
+# runcmd ./bootstrap
+# runcmd ./configure "${configArgs}"
+# runcmd make -j"${numberOfCores}" 
+# runcmd sudo make -j"${numberOfCores}" install
+# runcmd sudo ldconfig
+# runcmd cd "${repositoryDir}"
 
-# Install lttng-tools
-runcmd cd lttng-tools
+# # Install lttng-tools
+# runcmd cd lttng-tools
+# runcmd git checkout ds
+# runcmd ./bootstrap
+# runcmd ./configure "${configArgs}"
+# rumcmd make -j"${numberOfCores}" 
+# runcmd sudo make -j"${numberOfCores}" install
+# runcmd sudo ldconfig
+# runcmd cd "${repositoryDir}"
+
+# # Install lttng-modules
+# # Exhausts memory at 1 GiB memory, so try to have more
+# # Requires fsl-lttng-linux kernel
+# runcmd cd lttng-modules
+# runcmd git checkout ds
+# runcmd make -j"${numberOfCores}" 
+# runcmd sudo make -j"${numberOfCores}" modules_install
+# runcmd sudo depmod -a
+# runcmd cd "${repositoryDir}"
+
+# Install fsl-strace
+runcmd cd fsl-strace
 runcmd git checkout ds
-runcmd ./bootstrap
-runcmd ./configure "${configArgs}"
-rumcmd make -j"${numberOfCores}" 
-runcmd sudo make -j"${numberOfCores}" install
-runcmd sudo ldconfig
+runcmd sudo chmod +x build-fsl-strace.sh
+runcmd sudo ./build-fsl-strace.sh --install --install-packages
 runcmd cd "${repositoryDir}"
 
-# Install lttng-modules
-# Exhausts memory at 1 GiB memory, so try to have more
-# Requires fsl-lttng-linux kernel
-runcmd cd lttng-modules
-runcmd git checkout ds
-runcmd make -j"${numberOfCores}" 
-runcmd sudo make -j"${numberOfCores}" modules_install
-runcmd sudo depmod -a
+# Install trace2model
+runcmd cd trace2model/strace2ds-library
+runcmd autoreconf -v -i
+runcmd rm -rf BUILD
+runcmd mkdir -p BUILD
+runcmd mkdir -p xml
+runcmd cd tables
+runcmd perl gen-xml-enums.pl
+runcmd cd ../
+runcmd cp -r ./xml BUILD
+runcmd cd BUILD
+runcmd export CXXFLAGS="-I${installDir}/include"
+runcmd export LDFLAGS="-L${installDir}/lib"
+runcmd ../configure --enable-shared --disable-static \
+    --prefix="${installDir}/strace2ds"
+runcmd make clean
+runcmd make -j"${numberOfCores}"
+if [[ "${install}" == true ]]; then
+    runcmd sudo make -j"${numberOfCores}" install
+else
+    runcmd make -j"${numberOfCores}" install
+fi
 runcmd cd "${repositoryDir}"
 
 # Install babeltrace
 runcmd cd babeltrace
-runcmd git checkout master  # Default branch depends on strace2ds
+runcmd git checkout ds
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
 runcmd make -j"${numberOfCores}" 
-runcmd sudo make install -j"${numberOfCores}" 
+runcmd sudo make -j"${numberOfCores}" install 
 runcmd sudo ldconfig
-runcmd cd "${repositoryDir}"
-
-# Install fsl-strace
-runcmd cd fsl-strace
-runcmd sudo chmod +x build-fsl-strace.sh
-runcmd sudo ./build-fsl-strace.sh --install --install-packages
 runcmd cd "${repositoryDir}"
