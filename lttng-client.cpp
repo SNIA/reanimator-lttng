@@ -27,7 +27,7 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
       "lttng session directory path")(
       "exec,e", po::value<std::string>(),
       "executable string which is going to be run through lttng")(
-      "ds-output,o", po::value<std::string>(), "ds output file path");
+      "ds-output,d", po::value<std::string>(), "ds output file path");
 
   po::options_description test_program_parameters("test program parameters");
   test_program_parameters.add_options()("test-program-parameters,p",
@@ -96,40 +96,19 @@ void lttng_config(void) {
   system(
       "sudo lttng enable-channel channel0 -k --discard --num-subbuf 64 >> "
       "lttng-client.log");
-  // system(
-  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-  //     "--all "
-  //     "--syscall >> lttng-client.log");
+  system(
+      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
+      "--all "
+      "--syscall >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_add_to_page_cache >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "writeback_wbc_writepage >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "ext4_writepage >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "ext4_da_writepage >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "ext4_da_writepages >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "mm_filemap_fsl_read >> lttng-client.log");
   system(
       "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
       "fsl_writeback_dirty_page >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "mm_vmscan_writepage >> lttng-client.log");
-  system(
-      "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-      "wbc_writepage_fsl >> lttng-client.log");
-  // system(
-  //     "sudo lttng enable-event -s strace2ds-session -c channel0 --kernel "
-  //     "writeback_dirty_page >> lttng-client.log");
   // system(
   //     "lttng enable-event -s strace2ds-session -c channel0 --kernel "
   //     "writeback_dirty_inode >> lttng-client.log");
@@ -147,7 +126,7 @@ void lttng_config(void) {
       "lttng-client.log");
 }
 
-int main(int argc, char *argv[], char *envp[]) {
+int main(int argc, char *argv[]) {
   int process_id, process_group_id;
   int child_process_parameter_idx = 0;
   bool verbose = false;
@@ -192,52 +171,52 @@ int main(int argc, char *argv[], char *envp[]) {
     std::string session_folder_create = "mkdir -p " + session_directory;
     system(session_folder_create.c_str());
     std::string create_session_cmd =
-        "lttng create strace2ds-session --output=";
+        "sudo lttng create strace2ds-session --output=";
     create_session_cmd += session_directory + " >> lttng-client.log";
     system(create_session_cmd.c_str());
 
     std::string tracking_str =
-        "lttng track -k --pid=" + std::to_string(process_group_id) +
+        "sudo lttng track -k --pid=" + std::to_string(process_group_id) +
         " >> lttng-client.log";
     system(tracking_str.c_str());
 
     lttng_config();
 
     char *const exec_file = strdup(executable_name.c_str());
-    // char *const env[] = {nullptr};
+    char *const env[] = {nullptr};
     if (verbose) {
       std::cout << PRE_LOG_MESSAGE << "lttng start capturing"
                 << POST_LOG_MESSAGE << std::endl;
     }
-    system("lttng start strace2ds-session >> lttng-client.log");
+    system("sudo lttng start strace2ds-session >> lttng-client.log");
 
     timers[0] = std::chrono::high_resolution_clock::now();
 
     execve(exec_file, (char *const *)&argv[child_process_parameter_idx + 1],
-           envp);
+           env);
   }
   waitpid(child_pid, nullptr, 0);
 
   timers[1] = std::chrono::high_resolution_clock::now();
 
-  system("lttng untrack -k --pid --all >> lttng-client.log");
+  system("sudo lttng untrack -k --pid --all >> lttng-client.log");
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "execution finished" << std::endl;
     std::cout << PRE_LOG_MESSAGE << "lttng stop capturing" << POST_LOG_MESSAGE
               << std::endl;
   }
-  system("lttng stop strace2ds-session >> lttng-client.log");
+  system("sudo lttng stop strace2ds-session >> lttng-client.log");
 
   std::chrono::high_resolution_clock::time_point whole_trace_end =
       std::chrono::high_resolution_clock::now();
 
-  std::string permission_update = "chmod -R 755 " + session_directory;
+  std::string permission_update = "sudo chmod -R 755 " + session_directory;
   system(permission_update.c_str());
 
   std::string babeltrace_cmd =
       "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
-      " -x /strace2ds_test/buffer-capture.dat" + " >> babeltrace.bt";
+      " -x /tmp/buffer-capture.dat" + " >> /dev/null";
   // std::string babeltrace_cmd =
   //     "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
 
@@ -289,8 +268,8 @@ int main(int argc, char *argv[], char *envp[]) {
          << babeltrace_timing << "\n";
   report.close();
 
-  system("lttng destroy strace2ds-session >> lttng-client.log");
-  system("rm -rf /strace2ds_test/buffer-capture.dat");
+  system("sudo lttng destroy strace2ds-session >> /dev/null");
+  system("sudo rm -rf /tmp/buffer-capture.dat");
 
   std::cout.flags(flags);
   return 0;

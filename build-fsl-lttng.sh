@@ -214,3 +214,8 @@ runcmd make -j"${numberOfCores}"
 runcmd sudo make -j"${numberOfCores}" install 
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
+
+# Install FSL-LTTng
+runcmd cd "${repositoryDir}"
+runcmd cmake ..
+runcmd make -j"${numberOfCores}"
