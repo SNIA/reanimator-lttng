@@ -134,7 +134,8 @@ runcmd cd "${repositoryDir}"
 [[ -d "babeltrace" ]] || runcmd git clone https://github.com/sbu-fsl/babeltrace.git
 [[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
 [[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/fsl-strace.git
-[[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
+[[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
+[[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
 # Install userspace-rcu
 runcmd cd userspace-rcu
@@ -179,6 +180,19 @@ runcmd cd fsl-strace
 runcmd git checkout ds
 runcmd sudo chmod +x build-fsl-strace.sh
 runcmd sudo ./build-fsl-strace.sh --install --install-packages
+runcmd cd "${repositoryDir}"
+
+# Build TBB
+runcmd cd oneTBB
+if [[ "${install}" == true ]]; then
+    runcmd sudo cp -r ./include/. "${installDir}/include"
+    runcmd sudo make tbb_build_dir="${installDir}/lib" \
+        tbb_build_prefix=one_tbb -j"${numberOfCores}"
+else
+    runcmd cp -r ./include/. "${installDir}/include"
+    runcmd make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb \
+        -j"${numberOfCores}"
+fi
 runcmd cd "${repositoryDir}"
 
 # Install trace2model
