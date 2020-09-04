@@ -125,9 +125,6 @@ if [[ "${#missingPrograms[@]}" -gt 0 ]]; then
     fi
 fi
 
-# Copy over syscall table
-runcmd sudo cp syscalls_name_number.table /usr/local/strace2ds/tables/
-
 # Clone repositories
 runcmd mkdir -p "${repositoryDir}"
 runcmd cd "${repositoryDir}"
@@ -197,6 +194,7 @@ else
     runcmd make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb \
         -j"${numberOfCores}"
 fi
+runcmd sudo cp /usr/local/lib/one_tbb_release/*.so /usr/local/lib
 runcmd cd "${repositoryDir}"
 
 # Build trace2model
@@ -234,6 +232,7 @@ runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
 # Build FSL-LTTng
+runcmd sudo cp "${repositoryDir}"/../syscalls_name_number.table /usr/local/strace2ds/tables/
 runcmd cd "${repositoryDir}"
 runcmd cmake ..
 runcmd make -j"${numberOfCores}"
