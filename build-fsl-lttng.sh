@@ -221,6 +221,11 @@ else
 fi
 runcmd cd "${repositoryDir}"
 
+# Build syscall-replayer
+runcmd cd trace2model/syscall-replayer
+runcmd make -j"${numberOfCores}"
+runcmd cd "${repositoryDir}"
+
 # Build babeltrace
 runcmd cd babeltrace
 runcmd git checkout ds
