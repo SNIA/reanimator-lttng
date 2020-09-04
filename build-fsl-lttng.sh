@@ -6,7 +6,8 @@
 ####################
 # Script variables #
 ####################
-readonly programDependencies=("asciidoc" "autoconf" "bison" "flex" "g++" "gcc" "git" "libdw-dev" "libelf-dev" "libgtk2.0-dev" "libpopt-dev" "libnuma-dev" "libtool" "libxml2-dev" "make" "perl" "uuid-dev")
+
+readonly programDependencies=("asciidoc" "bison" "flex" "make")
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
@@ -124,6 +125,9 @@ if [[ "${#missingPrograms[@]}" -gt 0 ]]; then
     fi
 fi
 
+# Copy over syscall table
+runcmd sudo cp syscalls_name_number.table /usr/local/strace2ds/tables/
+
 # Clone repositories
 runcmd mkdir -p "${repositoryDir}"
 runcmd cd "${repositoryDir}"
@@ -137,7 +141,7 @@ runcmd cd "${repositoryDir}"
 [[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
 [[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
-# Install userspace-rcu
+# Build userspace-rcu
 runcmd cd userspace-rcu
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
@@ -146,7 +150,7 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Install lttng-ust
+# Build lttng-ust
 runcmd cd  lttng-ust
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
@@ -155,7 +159,7 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Install lttng-tools
+# Build lttng-tools
 runcmd cd lttng-tools
 runcmd git checkout ds
 runcmd ./bootstrap
@@ -165,7 +169,7 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Install lttng-modules
+# Build lttng-modules
 # Exhausts memory at 1 GiB memory, so try to have more
 # Requires fsl-lttng-linux kernel
 runcmd cd lttng-modules
@@ -175,7 +179,7 @@ runcmd sudo make -j"${numberOfCores}" modules_install
 runcmd sudo depmod -a
 runcmd cd "${repositoryDir}"
 
-# Install fsl-strace
+# Build fsl-strace
 runcmd cd fsl-strace
 runcmd git checkout ds
 runcmd sudo chmod +x build-fsl-strace.sh
@@ -195,7 +199,7 @@ else
 fi
 runcmd cd "${repositoryDir}"
 
-# Install trace2model
+# Build trace2model
 runcmd cd trace2model/strace2ds-library
 runcmd autoreconf -v -i
 runcmd rm -rf BUILD
@@ -219,7 +223,7 @@ else
 fi
 runcmd cd "${repositoryDir}"
 
-# Install babeltrace
+# Build babeltrace
 runcmd cd babeltrace
 runcmd git checkout ds
 runcmd ./bootstrap
@@ -229,7 +233,7 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Install FSL-LTTng
+# Build FSL-LTTng
 runcmd cd "${repositoryDir}"
 runcmd cmake ..
 runcmd make -j"${numberOfCores}"
