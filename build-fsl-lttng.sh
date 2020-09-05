@@ -199,7 +199,6 @@ runcmd cd "${repositoryDir}"
 
 # Build trace2model
 runcmd cd trace2model/strace2ds-library
-runcmd git checkout replayer_makefile
 runcmd autoreconf -v -i
 runcmd rm -rf BUILD
 runcmd mkdir -p BUILD
