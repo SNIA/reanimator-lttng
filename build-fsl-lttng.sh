@@ -194,11 +194,12 @@ else
     runcmd make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb \
         -j"${numberOfCores}"
 fi
-runcmd sudo cp /usr/local/lib/one_tbb_release/*.so /usr/local/lib
+runcmd sudo cp /usr/local/lib/one_tbb_release/*.so* /usr/local/lib
 runcmd cd "${repositoryDir}"
 
 # Build trace2model
 runcmd cd trace2model/strace2ds-library
+runcmd git checkout replayer_makefile
 runcmd autoreconf -v -i
 runcmd rm -rf BUILD
 runcmd mkdir -p BUILD
