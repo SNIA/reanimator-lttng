@@ -1,8 +1,10 @@
 # FSL LTTng - an LTTng fork designed for re-animation
 
 This is the orchestrator for FSL LTTng, an LTTng fork designed for re-animation.
+
 For more information on the Re-Animator project, please see our paper [Re-Animator: Versatile High-Fidelity Storage-System Tracing and Replaying](https://doi.org/10.1145/3383669.3398276).
-fsl-strace is under development by Ibrahim Umit Akgun of the File Systems and Storage Lab (FSL) at Stony Brook University under Professor Erez Zadok, with assistance from Professor Geoff Kuenning at Harvey Mudd College.
+
+FSL LTTng is under development by Ibrahim Umit Akgun of the File Systems and Storage Lab (FSL) at Stony Brook University under Professor Erez Zadok, with assistance from Professor Geoff Kuenning at Harvey Mudd College.
 
 ## Dependencies
 
