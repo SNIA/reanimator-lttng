@@ -142,7 +142,7 @@ runcmd cd "${repositoryDir}"
 runcmd cd userspace-rcu
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
-runcmd make -j"${numberOfCores}" 
+runcmd make -j"${numberOfCores}"
 runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
@@ -151,7 +151,7 @@ runcmd cd "${repositoryDir}"
 runcmd cd  lttng-ust
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
-runcmd make -j"${numberOfCores}" 
+runcmd make -j"${numberOfCores}"
 runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
@@ -161,7 +161,7 @@ runcmd cd lttng-tools
 runcmd git checkout ds
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
-rumcmd make -j"${numberOfCores}" 
+rumcmd make -j"${numberOfCores}"
 runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
@@ -170,8 +170,14 @@ runcmd cd "${repositoryDir}"
 # Exhausts memory at 1 GiB memory, so try to have more
 # Requires fsl-lttng-linux kernel
 runcmd cd lttng-modules
-runcmd git checkout ds
-runcmd make -j"${numberOfCores}" 
+ubuntu_version=$(lsb_release -d | awk '{print $3}')
+echo $ubuntu_version
+if [[ "${ubuntu_version}" == "18.04.3" ]]; then
+    runcmd git checkout u18-changes
+else
+    runcmd git checkout ds
+fi
+runcmd make -j"${numberOfCores}"
 runcmd sudo make -j"${numberOfCores}" modules_install
 runcmd sudo depmod -a
 runcmd cd "${repositoryDir}"
@@ -230,9 +236,10 @@ runcmd cd "${repositoryDir}"
 runcmd cd babeltrace
 runcmd git checkout ds
 runcmd ./bootstrap
+runcmd sed -i 's/O2/O0/g' configure  # U18 O2 Hotfix
 runcmd ./configure "${configArgs}"
-runcmd make -j"${numberOfCores}" 
-runcmd sudo make -j"${numberOfCores}" install 
+runcmd make -j"${numberOfCores}"
+runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
