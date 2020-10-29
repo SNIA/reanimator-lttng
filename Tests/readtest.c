@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2019 Erez Zadok
+ * Copyright (c) 2019-2020 Ibrahim Umit Akgun
+ * Copyright (c) 2020 Lukas Velikov */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
