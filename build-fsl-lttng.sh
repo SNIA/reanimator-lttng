@@ -128,18 +128,17 @@ fi
 # Clone repositories
 runcmd mkdir -p "${repositoryDir}"
 runcmd cd "${repositoryDir}"
-[[ -d "userspace-rcu" ]] || runcmd git clone https://github.com/sbu-fsl/userspace-rcu.git
-[[ -d "lttng-ust" ]] || runcmd git clone https://github.com/sbu-fsl/lttng-ust.git
-[[ -d "lttng-tools" ]] || runcmd git clone https://github.com/sbu-fsl/lttng-tools.git
-[[ -d "lttng-modules" ]] || runcmd git clone https://github.com/sbu-fsl/lttng-modules.git
-[[ -d "babeltrace" ]] || runcmd git clone https://github.com/sbu-fsl/babeltrace.git
-[[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
-[[ -d "fsl-strace" ]] || runcmd git clone https://github.com/sbu-fsl/fsl-strace.git
-[[ -d "trace2model" ]] || runcmd git clone https://github.com/sbu-fsl/trace2model.git
+[[ -d "reanimator-userspace-rcu" ]] || runcmd git clone https://github.com/SNIA/reanimator-userspace-rcu.git
+[[ -d "reanimator-lttng-ust" ]] || runcmd git clone https://github.com/SNIA/reanimator-lttng-ust.git
+[[ -d "reanimator-lttng-tools" ]] || runcmd git clone https://github.com/SNIA/reanimator-lttng-tools.git
+[[ -d "reanimator-lttng-modules" ]] || runcmd git clone https://github.com/SNIA/reanimator-lttng-modules.git
+[[ -d "reanimator-babeltrace" ]] || runcmd git clone https://github.com/SNIA/reanimator-babeltrace.git
+[[ -d "reanimator-library" ]] || runcmd git clone https://github.com/SNIA/reanimator-library.git
+[[ -d "reanimator-strace" ]] || runcmd git clone https://github.com/SNIA/reanimator-strace.git
 [[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
-# Build userspace-rcu
-runcmd cd userspace-rcu
+# Build reanimator-userspace-rcu
+runcmd cd reanimator-userspace-rcu
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
 runcmd make -j"${numberOfCores}"
@@ -147,8 +146,8 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Build lttng-ust
-runcmd cd  lttng-ust
+# Build reanimator-lttng-ust
+runcmd cd reanimator-lttng-ust
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
 runcmd make -j"${numberOfCores}"
@@ -156,8 +155,8 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Build lttng-tools
-runcmd cd lttng-tools
+# Build reanimator-lttng-tools
+runcmd cd reanimator-lttng-tools
 runcmd git checkout ds
 runcmd ./bootstrap
 runcmd ./configure "${configArgs}"
@@ -166,10 +165,10 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Build lttng-modules
+# Build reanimator-lttng-modules
 # Exhausts memory at 1 GiB memory, so try to have more
 # Requires fsl-lttng-linux kernel
-runcmd cd lttng-modules
+runcmd cd reanimator-lttng-modules
 ubuntu_version=$(lsb_release -d | awk '{print $3}')
 echo $ubuntu_version
 if [[ "${ubuntu_version}" == "18.04.3" ]]; then
@@ -182,8 +181,8 @@ runcmd sudo make -j"${numberOfCores}" modules_install
 runcmd sudo depmod -a
 runcmd cd "${repositoryDir}"
 
-# Build fsl-strace
-runcmd cd fsl-strace
+# Build reanimator-strace
+runcmd cd reanimator-strace
 runcmd git checkout ds
 runcmd sudo chmod +x build-fsl-strace.sh
 runcmd sudo ./build-fsl-strace.sh --install --install-packages
@@ -203,8 +202,8 @@ fi
 runcmd sudo cp /usr/local/lib/one_tbb_release/*.so* /usr/local/lib
 runcmd cd "${repositoryDir}"
 
-# Build trace2model
-runcmd cd trace2model/strace2ds-library
+# Build reanimator-library
+runcmd cd reanimator-library/strace2ds-library
 runcmd autoreconf -v -i
 runcmd rm -rf BUILD
 runcmd mkdir -p BUILD
@@ -228,12 +227,12 @@ fi
 runcmd cd "${repositoryDir}"
 
 # Build syscall-replayer
-runcmd cd trace2model/syscall-replayer
+runcmd cd reanimator-library/syscall-replayer
 runcmd make -j"${numberOfCores}"
 runcmd cd "${repositoryDir}"
 
-# Build babeltrace
-runcmd cd babeltrace
+# Build reanimator-babeltrace
+runcmd cd reanimator-babeltrace
 runcmd git checkout ds
 runcmd ./bootstrap
 runcmd sed -i 's/O2/O0/g' configure  # U18 O2 Hotfix
