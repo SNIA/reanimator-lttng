@@ -219,11 +219,11 @@ int main(int argc, char *argv[]) {
   std::string permission_update = "sudo chmod -R 755 " + session_directory;
   system(permission_update.c_str());
 
-  std::string babeltrace_cmd =
-      "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
-      " -x /tmp/buffer-capture.dat" + " >> /dev/null";
   // std::string babeltrace_cmd =
-  //     "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
+  //     "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
+  //     " -x /tmp/buffer-capture.dat" + " >> /dev/null";
+  std::string babeltrace_cmd =
+      "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
