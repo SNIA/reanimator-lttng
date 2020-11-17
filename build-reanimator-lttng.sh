@@ -7,7 +7,7 @@
 # Script variables #
 ####################
 
-readonly programDependencies=("asciidoc" "bison" "flex" "make")
+readonly programDependencies=("asciidoc" "autoconf" "automake" "bison" "cmake" "flex" "git" "make" "perl")
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
@@ -184,8 +184,8 @@ runcmd cd "${repositoryDir}"
 # Build reanimator-strace
 runcmd cd reanimator-strace
 runcmd git checkout ds
-runcmd sudo chmod +x build-fsl-strace.sh
-runcmd sudo ./build-fsl-strace.sh --install --install-packages
+runcmd sudo chmod +x build-reanimator-strace.sh
+runcmd sudo ./build-reanimator-strace.sh --install --install-packages
 runcmd cd "${repositoryDir}"
 
 # Build TBB
