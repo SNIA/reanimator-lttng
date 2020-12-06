@@ -27,8 +27,8 @@ boost::program_options::variables_map get_options(int argc, char *argv[]) {
   generic.add_options()("help,h", "lttng-client [-s, -d] -e [COMMAND]");
 
   po::options_description config("Configuration");
-  config.add_options()("verbose,v", "prints execution logs")(
-      "session-directory,s", po::value<std::string>(),
+  config.add_options()("verbose,q", "prints execution logs")(
+      "session-directory,w", po::value<std::string>(),
       "lttng session directory path")(
       "exec,e", po::value<std::string>(),
       "executable string which is going to be run through lttng")(
@@ -79,7 +79,7 @@ void process_options(int argc, char *argv[], bool *verbose,
   if (options_vm.count("session-directory") != 0u) {
     *session_directory = options_vm["session-directory"].as<std::string>();
   } else {
-    *session_directory = "/strace2ds_test/session-capture";
+    *session_directory = "/test/session-capture";
   }
 
   if (options_vm.count("ds-output") != 0u) {
@@ -225,8 +225,8 @@ int main(int argc, char *argv[]) {
   // std::string babeltrace_cmd =
   //     "babeltrace " + session_directory + "/kernel -w " + ds_output_name +
   //     " -x /tmp/buffer-capture.dat" + " >> /dev/null";
-  std::string babeltrace_cmd =
-      "babeltrace " + session_directory + "/kernel " + " >> babeltrace.bt";
+  std::string babeltrace_cmd = "babeltrace " + session_directory + "/kernel " +
+                               " >> /test/babeltrace.bt";
 
   if (verbose) {
     std::cout << PRE_LOG_MESSAGE << "babeltrace started" << std::endl;
