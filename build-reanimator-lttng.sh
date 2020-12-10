@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Description: Install script for fsl-lttng and dependencies
+# Description: Install script for reanimator-lttng and dependencies
 # Authors:     Thomas Fleming, Lukas Velikov
 
 ####################
@@ -11,7 +11,7 @@ readonly programDependencies=("asciidoc" "autoconf" "automake" "bison" "cmake" "
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
-installDir="$(pwd)/fsl-lttng"
+installDir="$(pwd)/reanimator-lttng"
 installPackages=false
 missingPrograms=()
 repositoryDir="$(pwd)/build"
@@ -134,6 +134,7 @@ runcmd cd "${repositoryDir}"
 [[ -d "reanimator-lttng-modules" ]] || runcmd git clone https://github.com/SNIA/reanimator-lttng-modules.git
 [[ -d "reanimator-babeltrace" ]] || runcmd git clone https://github.com/SNIA/reanimator-babeltrace.git
 [[ -d "reanimator-library" ]] || runcmd git clone https://github.com/SNIA/reanimator-library.git
+[[ -d "reanimator-replayer" ]] || runcmd git clone https://github.com/SNIA/reanimator-replayer.git
 [[ -d "reanimator-strace" ]] || runcmd git clone https://github.com/SNIA/reanimator-strace.git
 [[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
@@ -167,12 +168,12 @@ runcmd cd "${repositoryDir}"
 
 # Build reanimator-lttng-modules
 # Exhausts memory at 1 GiB memory, so try to have more
-# Requires fsl-lttng-linux kernel
+# Requires Reanimator fsl-lttng-linux kernel
 runcmd cd reanimator-lttng-modules
 ubuntu_version=$(lsb_release -d | awk '{print $3}')
 echo $ubuntu_version
 if [[ "${ubuntu_version}" == "18.04.3" ]]; then
-    runcmd git checkout u18-changes
+    runcmd git checkout u18-changes  # u18 support
 else
     runcmd git checkout ds
 fi
@@ -190,6 +191,8 @@ runcmd cd "${repositoryDir}"
 
 # Build TBB
 runcmd cd oneTBB
+runcmd git fetch --all --tags --prune
+runcmd git checkout tags/v2020.3  #
 if [[ "${install}" == true ]]; then
     runcmd sudo cp -r ./include/. "${installDir}/include"
     runcmd sudo make tbb_build_dir="${installDir}/lib" \
@@ -203,31 +206,21 @@ runcmd sudo cp /usr/local/lib/one_tbb_release/*.so* /usr/local/lib
 runcmd cd "${repositoryDir}"
 
 # Build reanimator-library
-runcmd cd reanimator-library/strace2ds-library
-runcmd autoreconf -v -i
-runcmd rm -rf BUILD
-runcmd mkdir -p BUILD
-runcmd mkdir -p xml
-runcmd cd tables
-runcmd perl gen-xml-enums.pl
-runcmd cd ../
-runcmd cp -r ./xml BUILD
-runcmd cd BUILD
-runcmd export CXXFLAGS="-I${installDir}/include"
-runcmd export LDFLAGS="-L${installDir}/lib"
-runcmd ../configure --enable-shared --disable-static \
-    --prefix="${installDir}/strace2ds"
-runcmd make clean
-runcmd make -j"${numberOfCores}"
+runcmd cd reanimator-library
+runcmd chmod +x buildall.sh
 if [[ "${install}" == true ]]; then
-    runcmd sudo make -j"${numberOfCores}" install
+    runcmd ./buildall.sh install
 else
-    runcmd make -j"${numberOfCores}" install
+    runcmd ./buildall.sh
 fi
 runcmd cd "${repositoryDir}"
 
-# Build syscall-replayer
-runcmd cd reanimator-library/syscall-replayer
+# Build reanimator-replayer
+runcmd cd reanimator-replayer
+runcmd rm -rf build
+runcmd mkdir build
+runcmd cd build
+runcmd cmake ..
 runcmd make -j"${numberOfCores}"
 runcmd cd "${repositoryDir}"
 
@@ -242,7 +235,7 @@ runcmd sudo make -j"${numberOfCores}" install
 runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
-# Build FSL-LTTng
+# Build reanimator-lttng
 runcmd sudo cp "${repositoryDir}"/../syscalls_name_number.table /usr/local/strace2ds/tables/
 runcmd cd "${repositoryDir}"
 runcmd cmake ..

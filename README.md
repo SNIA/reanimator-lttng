@@ -33,5 +33,6 @@ As well as the following Re-Animator components:
 * [reanimator-userspace-rcu](https://github.com/SNIA/reanimator-userspace-rcu) - a lockless synchronization method
 * [reanimator-babeltrace](https://github.com/SNIA/reanimator-babeltrace) - for trace format conversion
 * [reanimator-library](https://github.com/SNIA/reanimator-library) - converts system call traces to DataSeries
+* [reanimator-replayer](https://github.com/SNIA/reanimator-replayer) - replays executables from saved traces
 * [reanimator-strace](https://github.com/SNIA/reanimator-strace) - an strace fork compatible with DataSeries
 * [oneTBB](https://github.com/oneapi-src/oneTBB) - thread building blocks for parallel C++ programs
