@@ -209,7 +209,7 @@ runcmd cd "${repositoryDir}"
 runcmd cd reanimator-library
 runcmd chmod +x buildall.sh
 if [[ "${install}" == true ]]; then
-    runcmd ./buildall.sh install
+    runcmd ./buildall.sh --install --install-dir /usr/local --dataseries-dir reanimator-strace/BUILD/repositories/DataSeries
 else
     runcmd ./buildall.sh
 fi
@@ -236,6 +236,7 @@ runcmd sudo ldconfig
 runcmd cd "${repositoryDir}"
 
 # Build reanimator-lttng
+runcmd sudo mkdir -p /usr/local/strace2ds/tables/
 runcmd sudo cp "${repositoryDir}"/../syscalls_name_number.table /usr/local/strace2ds/tables/
 runcmd cd "${repositoryDir}"
 runcmd cmake ..
