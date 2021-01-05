@@ -126,7 +126,6 @@ runcmd cd "${repositoryDir}"
 [[ -d "reanimator-babeltrace" ]] || runcmd git clone https://github.com/SNIA/reanimator-babeltrace.git
 [[ -d "reanimator-library" ]] || runcmd git clone https://github.com/SNIA/reanimator-library.git
 [[ -d "reanimator-replayer" ]] || runcmd git clone https://github.com/SNIA/reanimator-replayer.git
-[[ -d "reanimator-strace" ]] || runcmd git clone https://github.com/SNIA/reanimator-strace.git
 [[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
 # Build reanimator-userspace-rcu
@@ -173,17 +172,17 @@ runcmd sudo make -j"${numberOfCores}" modules_install
 runcmd sudo depmod -a
 runcmd cd "${repositoryDir}"
 
-# Build reanimator-strace
-runcmd cd reanimator-strace
-runcmd git checkout ds
-runcmd sudo chmod +x build-reanimator-strace.sh
-runcmd sudo ./build-reanimator-strace.sh --install --install-packages
+# Build reanimator-library
+runcmd cd reanimator-library
+runcmd git checkout convert-to-cmake  # TODO: Remove when #11 gets merged
+runcmd chmod +x build-reanimator-library.sh
+runcmd ./build-reanimator-library.sh --install
 runcmd cd "${repositoryDir}"
 
 # Build TBB
 runcmd cd oneTBB
 runcmd git fetch --all --tags --prune
-runcmd git checkout tags/v2020.3  #
+runcmd git checkout tags/v2020.3
 runcmd sudo cp -r ./include/. "${installDir}/include"
 runcmd sudo make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb -j"${numberOfCores}"
 runcmd sudo cp /usr/local/lib/one_tbb_release/*.so* /usr/local/lib
