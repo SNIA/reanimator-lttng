@@ -174,7 +174,6 @@ runcmd cd "${repositoryDir}"
 
 # Build reanimator-library
 runcmd cd reanimator-library
-runcmd git checkout convert-to-cmake  # TODO: Remove when #11 gets merged
 runcmd chmod +x build-reanimator-library.sh
 runcmd ./build-reanimator-library.sh --install
 runcmd cd "${repositoryDir}"
