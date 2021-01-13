@@ -11,7 +11,7 @@ readonly programDependencies=("asciidoc" "autoconf" "automake" "bison" "cmake" "
 readonly numberOfCores="$(nproc --all)"
 configArgs=""
 install=false
-installDir="$(pwd)/reanimator-lttng"
+installDir="/usr/local"
 installPackages=false
 missingPrograms=()
 repositoryDir="$(pwd)/build"
@@ -40,7 +40,6 @@ function printUsage
 Usage: $0 [options...]
 Options:
     --config-args ARGS     Append ARGS to every ./configure command
-    --install              Install libraries and binaries under /usr/local
     --install-packages     Automatically use apt-get to install missing packages
     -h, --help             Print this help message
 EOF
@@ -55,17 +54,11 @@ EOF
 # Parse script arguments
 while [[ $# -gt 0 ]]; do
     key="$1"
-
     case "${key}" in
         --config-args)
             shift # past argument
             "${configArgs}"="$1"
             shift # past value
-            ;;
-        --install)
-            install=true
-            installDir="/usr/local"
-            shift # past argument
             ;;
         --install-packages)
             if command -v apt-get >/dev/null; then
@@ -87,11 +80,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # See if sudo is installed
-if [[ "${install}" == true ]]; then
-    if ! command -v sudo &>/dev/null; then
-        echo "Script could not find 'sudo' command. Cannot install." >&2
-        exit 1
-    fi
+if ! command -v sudo &>/dev/null; then
+    echo "Script could not find 'sudo' command. Cannot install." >&2
+    exit 1
 fi
 
 # Check whether program dependencies are installed
@@ -135,7 +126,6 @@ runcmd cd "${repositoryDir}"
 [[ -d "reanimator-babeltrace" ]] || runcmd git clone https://github.com/SNIA/reanimator-babeltrace.git
 [[ -d "reanimator-library" ]] || runcmd git clone https://github.com/SNIA/reanimator-library.git
 [[ -d "reanimator-replayer" ]] || runcmd git clone https://github.com/SNIA/reanimator-replayer.git
-[[ -d "reanimator-strace" ]] || runcmd git clone https://github.com/SNIA/reanimator-strace.git
 [[ -d "oneTBB" ]] || runcmd git clone https://github.com/oneapi-src/oneTBB.git
 
 # Build reanimator-userspace-rcu
@@ -182,37 +172,19 @@ runcmd sudo make -j"${numberOfCores}" modules_install
 runcmd sudo depmod -a
 runcmd cd "${repositoryDir}"
 
-# Build reanimator-strace
-runcmd cd reanimator-strace
-runcmd git checkout ds
-runcmd sudo chmod +x build-reanimator-strace.sh
-runcmd sudo ./build-reanimator-strace.sh --install --install-packages
+# Build reanimator-library
+runcmd cd reanimator-library
+runcmd chmod +x build-reanimator-library.sh
+runcmd ./build-reanimator-library.sh --install
 runcmd cd "${repositoryDir}"
 
 # Build TBB
 runcmd cd oneTBB
 runcmd git fetch --all --tags --prune
-runcmd git checkout tags/v2020.3  #
-if [[ "${install}" == true ]]; then
-    runcmd sudo cp -r ./include/. "${installDir}/include"
-    runcmd sudo make tbb_build_dir="${installDir}/lib" \
-        tbb_build_prefix=one_tbb -j"${numberOfCores}"
-else
-    runcmd cp -r ./include/. "${installDir}/include"
-    runcmd make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb \
-        -j"${numberOfCores}"
-fi
+runcmd git checkout tags/v2020.3
+runcmd sudo cp -r ./include/. "${installDir}/include"
+runcmd sudo make tbb_build_dir="${installDir}/lib" tbb_build_prefix=one_tbb -j"${numberOfCores}"
 runcmd sudo cp /usr/local/lib/one_tbb_release/*.so* /usr/local/lib
-runcmd cd "${repositoryDir}"
-
-# Build reanimator-library
-runcmd cd reanimator-library
-runcmd chmod +x buildall.sh
-if [[ "${install}" == true ]]; then
-    runcmd ./buildall.sh --install --install-dir /usr/local --dataseries-dir reanimator-strace/BUILD/repositories/DataSeries
-else
-    runcmd ./buildall.sh
-fi
 runcmd cd "${repositoryDir}"
 
 # Build reanimator-replayer
