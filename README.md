@@ -18,6 +18,7 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
 1. Run `build-reanimator-lttng.sh`
     * Run with `--install-packages` to install any missing packages
 1. The `lttng-client` executable will be located under the `build` directory
+1. Disable `sudo` prompts. Re-Animator LTTng components call `system(3)` with `sudo`. Alternatively, one may remove all instances of `sudo`, recompile, and run as root.
 
 ## Installing Re-Animator Linux Kernel Modifications
 
