@@ -8,37 +8,48 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
 
 ## Setup
 
-1. Ensure you have the Re-Animator Linux kernel patch installed.
+1. Ensure you have the Re-Animator Linux kernel patch installed. To install the Re-Animator Linux kernel patch, visit the [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications) section below
 1. Install the following required programs and libraries:
     ```
     asciidoc autoconf automake bison build-essential cmake flex g++ gcc git libaio-dev libboost-dev libboost-program-options-dev libboost-thread-dev libdw-dev libelf-dev libgtk2.0-dev libnuma-dev libpopt-dev libtool libxml2-dev libxml2-dev make perl uuid-dev zlib1g-dev
     ```
     All of the above requirements are available through the APT package manager on Ubuntu 16 and 18.
 1. Clone this repository
-1. Run `build-reanimator-lttng.sh`
-    * Run with `--install-packages` to install any missing packages
+    ```bash
+    git clone https://github.com/SNIA/reanimator-lttng.git
+    cd reanimator-lttng
+    ```
+1. Build Re-Animator LTTng with `build-reanimator-lttng.sh`. Run with `--install-packages` to install any missing packages
+    ```bash
+    ./build-reanimator-lttng.sh
+    ```
 1. The `lttng-client` executable will be located under the `build` directory
-1. Disable `sudo` prompts. Re-Animator LTTng components call `system(3)` with `sudo`. Alternatively, one may remove all instances of `sudo`, recompile, and run as root.
+1. Disable `sudo` prompts. Alternatively, one may remove all instances of `sudo`, recompile, and run as root. Re-Animator LTTng components call `system(3)` with `sudo`, and thus cannot function correctly without `sudo` prompts disabled.
 
 ## Installing Re-Animator Linux Kernel Modifications
 
 1. Clone the [Linux kernel stable tree](https://github.com/gregkh/linux) repository
     ```bash
     git clone https://github.com/gregkh/linux.git
+    cd linux
     ```
 1. Checkout [version 4.19.51](https://github.com/gregkh/linux/commit/7aa823a959e1f50c0dab9e01c1940235eccc04cc)
     ```bash
     git checkout 7aa823a959e1f50c0dab9e01c1940235eccc04cc
     ```
-1. Apply [linux_kernel.patch](https://github.com/SNIA/reanimator-lttng/blob/master/linux_kernel.patch), located at the root of this repository.
+1. Download [linux_kernel.patch](https://github.com/SNIA/reanimator-lttng/blob/master/linux_kernel.patch). Alternatively, the patch can be copied over from the root of this repository.
     ```bash
-    git apply --whitespace=warn linux_kernel.patch
+    wget https://raw.githubusercontent.com/SNIA/reanimator-lttng/master/linux_kernel.patch
+    ```
+1. Apply the kernel patch. Ignore any whitespace errors that may occur—they do not affect whether or not the patch is successfully applied.
+    ```bash
+    git apply linux_kernel.patch
     ```
 1. Install the following packages
     ```
     git fakeroot build-essential ncurses-dev xz-utils libssl-dev bc flex libelf-dev bison
     ```
-1. Install the modified kernel as normal. No changes are required for `make menuconfig`.
+1. Install the modified kernel as normal. No changes are required for `make menuconfig`
     ```bash
     cp /boot/config-$(uname -r) .config
     make menuconfig
@@ -46,7 +57,11 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
     sudo make modules_install -j$(nproc)
     sudo make install -j$(nproc)
     ```
-1. Restart your machine and confirm your changes
+1. Restart your machine
+    ```
+    sudo reboot
+    ```
+1. Confirm that you now have Linux version `4.19.51` installed
     ```bash
     uname -a
     ```
