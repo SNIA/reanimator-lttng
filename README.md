@@ -23,12 +23,14 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
     ```bash
     ./build-reanimator-lttng.sh
     ```
-1. The `lttng-client` executable will be located under the `build` directory
 1. Disable `sudo` prompts. Alternatively, one may remove all instances of `sudo`, recompile, and run as root. Re-Animator LTTng components call `system(3)` with `sudo`, and thus cannot function correctly without `sudo` prompts disabled.
+1. The `lttng-client` executable will be located under the `build` directory
 
 ## Installing Re-Animator Linux Kernel Modifications
 
-1. Clone the [Linux kernel stable tree](https://github.com/gregkh/linux) repository
+We recommend allocating at least 25 GiB of disk space before installing the Re-Animator Linux Kernel Modifications.
+
+1. Clone the [Linux kernel stable tree](https://github.com/gregkh/linux) repository.
     ```bash
     git clone https://github.com/gregkh/linux.git
     cd linux
@@ -61,10 +63,46 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
     ```
     sudo reboot
     ```
-1. Confirm that you now have Linux version `4.19.51` installed
+1. Confirm that you now have Linux version `4.19.51+` installed
     ```bash
     uname -a
     ```
+
+## Usage
+
+```
+Generic options:
+  -h [ --help ]                   lttng-client [-s, -d] -e [COMMAND]
+
+Configuration:
+  -v [ --verbose ]                prints execution logs
+  -s [ --session-directory ] arg  lttng session directory path
+  -e [ --exec ] arg               executable string which is going to be run 
+                                  through lttng
+  -d [ --ds-output ] arg          ds output file path
+```
+
+## Example
+
+In this example, we trace and replay `/bin/ls` in the Re-Animator LTTng build directory.
+
+### Tracing
+```bash
+$ ./lttng-client -s /tmp/session-capture/ -d /tmp/ls-example.ds -e /bin/ls
+CMakeCache.txt  Makefile  cmake_install.cmake  lttng-client.log   oneTBB                 reanimator-library        reanimator-lttng-tools  reanimator-replayer       report.txt
+CMakeFiles      Tests     lttng-client         lttng-read-buffer  reanimator-babeltrace  reanimator-lttng-modules  reanimator-lttng-ust    reanimator-userspace-rcu
+>>>>>>>>>>>    babeltrace timing                       :    176  
+>>>>>>>>>>>    tracing total timing                    :    933  
+>>>>>>>>>>>    tracing just for execution period timing:    7    
+```
+
+### Replaying
+```bash
+$ reanimator-replayer/build/system-call-replayer /tmp/ls-example.ds 
+CMakeCache.txt  Makefile  cmake_install.cmake  lttng-client.log   oneTBB                 reanimator-library        reanimator-lttng-tools  reanimator-replayer       report.txt
+CMakeFiles      Tests     lttng-client         lttng-read-buffer  reanimator-babeltrace  reanimator-lttng-modules  reanimator-lttng-ust    reanimator-userspace-rcu
+```
+
 ## Dependencies and Support
 
 Ubuntu 16 and 18 are officially supported.
