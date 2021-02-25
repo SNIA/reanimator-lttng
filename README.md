@@ -6,27 +6,19 @@ For more information on the Re-Animator project, please see our paper [Re-Animat
 
 Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems and Storage Lab (FSL) at Stony Brook University under Professor Erez Zadok.
 
+## Table of Contents
+
+- [Setup](#Setup)
+  - [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications)
+  - [Install Re-Animator LTTng](#Install-Re-Animator-LTTng)
+- [Usage](#Usage)
+- [Example](#Example)
+- [Contribute Traces to IOTTA](#Contribute-Traces-to-IOTTA)
+- [Dependencies and Support](#Dependencies-and-Support)
+
 ## Setup
 
-1. Ensure you have the Re-Animator Linux kernel patch installed. To install the Re-Animator Linux kernel patch, visit the [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications) section below
-1. Install the following required programs and libraries:
-    ```
-    asciidoc autoconf automake bison build-essential cmake flex g++ gcc git libaio-dev libboost-dev libboost-program-options-dev libboost-thread-dev libdw-dev libelf-dev libgtk2.0-dev libnuma-dev libpopt-dev libtool libxml2-dev libxml2-dev make perl uuid-dev zlib1g-dev
-    ```
-    All of the above requirements are available through the APT package manager on Ubuntu 16 and 18.
-1. Clone this repository
-    ```bash
-    git clone https://github.com/SNIA/reanimator-lttng.git
-    cd reanimator-lttng
-    ```
-1. Build Re-Animator LTTng with `build-reanimator-lttng.sh`. Run with `--install-packages` to install any missing packages
-    ```bash
-    ./build-reanimator-lttng.sh
-    ```
-1. Disable `sudo` prompts. Alternatively, one may remove all instances of `sudo`, recompile, and run as root. Re-Animator LTTng components call `system(3)` with `sudo`, and thus cannot function correctly without `sudo` prompts disabled.
-1. The `lttng-client` executable will be located under the `build` directory
-
-## Installing Re-Animator Linux Kernel Modifications
+### Installing Re-Animator Linux Kernel Modifications
 
 We recommend allocating at least 25 GiB of disk space before installing the Re-Animator Linux Kernel Modifications.
 
@@ -68,6 +60,26 @@ We recommend allocating at least 25 GiB of disk space before installing the Re-A
     uname -a
     ```
 
+### Install Re-Animator LTTng
+
+1. Ensure you have the Re-Animator Linux kernel patch installed. To install the Re-Animator Linux kernel patch, visit the [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications) section below
+1. Install the following required programs and libraries:
+    ```
+    asciidoc autoconf automake bison build-essential cmake flex g++ gcc git libaio-dev libboost-dev libboost-program-options-dev libboost-thread-dev libdw-dev libelf-dev libgtk2.0-dev libnuma-dev libpopt-dev libtool libxml2-dev libxml2-dev make perl uuid-dev zlib1g-dev
+    ```
+    All of the above requirements are available through the APT package manager on Ubuntu 16 and 18.
+1. Clone this repository
+    ```bash
+    git clone https://github.com/SNIA/reanimator-lttng.git
+    cd reanimator-lttng
+    ```
+1. Build Re-Animator LTTng with `build-reanimator-lttng.sh`. Run with `--install-packages` to install any missing packages
+    ```bash
+    ./build-reanimator-lttng.sh
+    ```
+1. Disable `sudo` prompts. Alternatively, one may remove all instances of `sudo`, recompile, and run as root. Re-Animator LTTng components call `system(3)` with `sudo`, and thus cannot function correctly without `sudo` prompts disabled.
+1. The `lttng-client` executable will be located under the `build` directory
+
 ## Usage
 
 ```
@@ -102,6 +114,10 @@ $ reanimator-replayer/build/system-call-replayer /tmp/ls-example.ds
 CMakeCache.txt  Makefile  cmake_install.cmake  lttng-client.log   oneTBB                 reanimator-library        reanimator-lttng-tools  reanimator-replayer       report.txt
 CMakeFiles      Tests     lttng-client         lttng-read-buffer  reanimator-babeltrace  reanimator-lttng-modules  reanimator-lttng-ust    reanimator-userspace-rcu
 ```
+
+## Contribute Traces to IOTTA
+
+We strongly encourage you to submit traces taken with Re-Animator LTTng to the SNIA IOTTA Repository. For more information, visit [FAQs for Contributing Trace Files](http://iotta.snia.org/faqs/contribute_traces).
 
 ## Dependencies and Support
 
