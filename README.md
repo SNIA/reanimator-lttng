@@ -20,7 +20,7 @@ Re-Animator LTTng is under development by Ibrahim Umit Akgun of the File Systems
 
 ### Installing Re-Animator Linux Kernel Modifications
 
-We recommend allocating at least 25 GiB of disk space before installing the Re-Animator Linux Kernel Modifications.
+Re-Animator LTTng requires Linux kernel modifications to function. We recommend allocating at least 25 GiB of disk space before beginning the installation process.
 
 1. Clone the [Linux kernel stable tree](https://github.com/gregkh/linux) repository.
     ```bash
