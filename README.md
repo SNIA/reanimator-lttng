@@ -62,7 +62,7 @@ We recommend allocating at least 25 GiB of disk space before installing the Re-A
 
 ### Install Re-Animator LTTng
 
-1. Ensure you have the Re-Animator Linux kernel patch installed. To install the Re-Animator Linux kernel patch, visit the [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications) section below
+1. Ensure you have the Re-Animator Linux kernel patch installed. To install the Re-Animator Linux kernel patch, visit the [Installing Re-Animator Linux Kernel Modifications](#Installing-Re-Animator-Linux-Kernel-Modifications) section
 1. Install the following required programs and libraries:
     ```
     asciidoc autoconf automake bison build-essential cmake flex g++ gcc git libaio-dev libboost-dev libboost-program-options-dev libboost-thread-dev libdw-dev libelf-dev libgtk2.0-dev libnuma-dev libpopt-dev libtool libxml2-dev libxml2-dev make perl uuid-dev zlib1g-dev
